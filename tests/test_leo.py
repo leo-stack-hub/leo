@@ -54,6 +54,44 @@ def test_end_stale_and_sleep():
     assert tr.sessions == {}
 
 
+def test_quick_tools_stay_visible_then_think():
+    tr = states.Tracker()
+    tr.apply(ev("UserPromptSubmit", 0))
+    tr.apply(ev("PreToolUse", 1, tool="Read"))
+    tr.apply(ev("PostToolUse", 1.05, tool="Read"))  # Read finishes in a blink
+    tr.tick(1.05 + states.TOOL_LINGER - 0.1)
+    d = tr.display()
+    assert d.state == "working" and d.detail == "reading"  # still on screen with his book
+    tr.tick(1.05 + states.TOOL_LINGER)
+    assert tr.display().state == "thinking"
+    tr.apply(ev("PreToolUse", 5, tool="Edit"))
+    tr.apply(ev("PostToolUse", 5.1, tool="Edit"))
+    assert tr.display().detail == "typing"
+    tr.apply(ev("Notification", 5.2, ntype="permission_prompt"))  # urgent states win at once
+    assert tr.display().state == "permission"
+
+
+@pytest.mark.parametrize("command,detail", [
+    ("cat README.md", "reading"), ("cd /src && grep -rn foo .", "reading"),
+    ("git log --oneline", "reading"), ("sed -n 1,40p a.py", "reading"),
+    ("sed -i '' s/a/b/ a.py", "typing"), ("FOO=1 ls -la", "reading"),
+    ("npm test", "running a command"), ("git push", "running a command"),
+    ("python3 -m pytest | tail -5", "running a command"),
+])
+def test_bash_commands_classified(command, detail):
+    assert states.tool_detail("Bash", command) == detail
+
+
+def test_hook_passes_the_shell_command():
+    from leo import hook
+
+    msg = hook.build_message({"hook_event_name": "PreToolUse", "tool_name": "Bash",
+                              "tool_input": {"command": "cat a.txt"}})
+    assert msg["tool"] == "Bash" and msg["command"] == "cat a.txt"
+    assert hook.build_message({"hook_event_name": "PreToolUse", "tool_name": "Read",
+                               "tool_input": {"file_path": "a"}})["command"] is None
+
+
 def test_auth_notification_ignored():
     assert states.Tracker().apply(ev("Notification", 1, ntype="auth_success")) is None
 

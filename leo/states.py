@@ -10,10 +10,33 @@ STATES = ["sleeping", "idle", "greeting", "thinking", "working", "done", "waitin
 PRIORITY = {s: i for i, s in enumerate(STATES)}
 
 TOOL_TEXT = {
-    **dict.fromkeys(["Read", "Grep", "Glob", "LS", "WebFetch", "WebSearch"], "reading"),
+    **dict.fromkeys(["Read", "Grep", "Glob", "LS", "WebFetch", "WebSearch", "NotebookRead"],
+                    "reading"),
     **dict.fromkeys(["Edit", "Write", "MultiEdit", "NotebookEdit"], "typing"),
     **dict.fromkeys(["Bash", "BashOutput"], "running a command"),
 }
+# Shell commands that only look at files: Leo reads instead of running.
+READ_CMDS = {"cat", "head", "tail", "less", "more", "grep", "egrep", "rg", "ag", "find", "fd",
+             "ls", "tree", "wc", "file", "stat", "jq", "diff", "awk", "sed"}
+READ_GIT = {"log", "diff", "show", "status", "blame", "grep", "ls-files"}
+TOOL_LINGER = 2.5  # keep a tool's pose at least this long: most tools finish in a blink
+
+
+def tool_detail(tool: str | None, command: str | None = None) -> str:
+    """What Leo acts out for a tool: reading, typing, running a command, or working."""
+    tool = tool or ""
+    if tool == "Bash" and command:
+        for part in command.replace("&&", ";").replace("||", ";").replace("|", ";").split(";"):
+            words = [w for w in part.split() if "=" not in w.split("/")[0]]  # skip FOO=bar
+            if not words or words[0] == "cd":
+                continue
+            cmd = words[0].rsplit("/", 1)[-1]
+            if cmd == "sed" and any(w.startswith("-i") for w in words):
+                return "typing"  # in-place edit
+            if cmd in READ_CMDS or (cmd == "git" and len(words) > 1 and words[1] in READ_GIT):
+                return "reading"
+            break  # judge by the first real command
+    return TOOL_TEXT.get(tool, "working")
 
 TEXT = {
     "sleeping": "Leo is sleeping",
@@ -53,6 +76,7 @@ class Session:
     last_event: float = field(default_factory=time.time)
     turn_start: float | None = None
     last_turn: float | None = None
+    linger_until: float | None = None  # a finished tool's pose stays on screen until then
 
 
 @dataclass
@@ -81,6 +105,7 @@ class Tracker:
             if s.state != state:
                 s.since = now
             s.state, s.detail = state, detail
+            s.linger_until = None
 
         if ev == "SessionStart":
             go("greeting")
@@ -89,9 +114,12 @@ class Tracker:
             s.turn_start = now
             go("thinking")
         elif ev == "PreToolUse":
-            go("working", TOOL_TEXT.get(msg.get("tool") or "", "working"))
+            go("working", tool_detail(msg.get("tool"), msg.get("command")))
         elif ev == "PostToolUse":
-            go("thinking")
+            if s.state == "working":  # let the pose be seen; tick() moves on to thinking
+                s.linger_until = now + TOOL_LINGER
+            else:
+                go("thinking")
         elif ev == "PreCompact":
             go("working", "tidying up")
         elif ev == "Notification":
@@ -114,6 +142,8 @@ class Tracker:
         """Time-based transitions: greeting/done fade, sleep, stale busy, forget."""
         now = time.time() if now is None else now
         for sid, s in list(self.sessions.items()):
+            if s.linger_until is not None and now >= s.linger_until:
+                s.state, s.detail, s.since, s.linger_until = "thinking", None, now, None
             age = now - s.since
             if now - s.last_event > FORGET_AFTER:
                 del self.sessions[sid]

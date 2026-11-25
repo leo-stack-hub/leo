@@ -18,11 +18,14 @@ from leo.common import IS_WINDOWS, launcher, send, venv_python  # noqa: E402
 
 
 def build_message(payload: dict) -> dict:
+    tool_input = payload.get("tool_input")
+    command = tool_input.get("command") if isinstance(tool_input, dict) else None
     return {
         "event": payload.get("hook_event_name", ""),
         "session": str(payload.get("session_id") or "default"),
         "cwd": payload.get("cwd") or os.getcwd(),
         "tool": payload.get("tool_name"),
+        "command": command[:300] if isinstance(command, str) else None,  # read-only shell? Leo reads
         "ntype": payload.get("notification_type"),
         "message": payload.get("message"),
         "ts": time.time(),
