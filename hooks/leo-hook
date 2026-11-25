@@ -1,0 +1,17 @@
+#!/bin/sh
+# Leo plugin hook: forwards a Claude Code event (JSON on stdin) to the Leo pet.
+# POSIX sh: runs on macOS, Linux and Windows (Git Bash, which Claude Code uses on Windows).
+# Golden rule: print nothing, always exit 0.
+
+home="${LEO_HOME:-${HOME:-$USERPROFILE}/.leo}"
+here="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)"
+
+for py in "$home/venv/bin/python" "$home/venv/Scripts/python.exe" python3 python; do
+    case "$py" in
+        /* | [A-Za-z]:*) [ -x "$py" ] || continue ;;
+        *) command -v "$py" >/dev/null 2>&1 || continue ;;
+    esac
+    "$py" "$here/leo/hook.py" >/dev/null 2>&1
+    exit 0
+done
+exit 0

@@ -1,0 +1,11 @@
+{
+  "name": "leo",
+  "owner": { "name": "leo-stack-hub" },
+  "plugins": [
+    {
+      "name": "leo",
+      "source": "./",
+      "description": "A desktop pet (with your own avatar) that shows what Claude Code is doing."
+    }
+  ]
+}
