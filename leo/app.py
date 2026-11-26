@@ -18,7 +18,7 @@ from PySide6.QtGui import (QAction, QActionGroup, QColor, QFont, QImage, QPainte
 from PySide6.QtNetwork import QHostAddress, QTcpServer, QTcpSocket
 from PySide6.QtWidgets import QApplication, QFileDialog, QInputDialog, QMenu, QWidget
 
-from . import animate, avatar, characters, config, desktop, hydrate, packs
+from . import animate, autostart, avatar, characters, config, desktop, hydrate, packs
 from .common import home, port_file, send
 from .states import TEXT, Tracker
 
@@ -252,6 +252,8 @@ class Pet(QWidget):
             self.reload_avatar()
         elif cmd == "quit":
             QApplication.quit()
+        elif cmd == "stay":  # opened as an app while Claude Code's hook had started it
+            self.stay = True
         elif cmd == "show" and msg.get("state") == "hydrate":
             self.start_water()
         elif cmd == "show":  # demo a state for 5 seconds
@@ -524,6 +526,10 @@ class Pet(QWidget):
         size_menu = m.addMenu("Size")
         for name, px in (("Small", 96), ("Medium", 128), ("Large", 180)):
             size_menu.addAction(name, lambda px=px: self.set_cfg(size=px))
+        login = QAction("Start at login", m, checkable=True)
+        login.setChecked(autostart.enabled())
+        login.triggered.connect(self.set_login)
+        m.addAction(login)
         mute = QAction("Mute sounds", m, checkable=True)
         mute.setChecked(self.cfg["muted"])
         mute.triggered.connect(lambda on: self.set_cfg(muted=on))
@@ -531,6 +537,13 @@ class Pet(QWidget):
         m.addSeparator()
         m.addAction("Quit Leo", QApplication.quit)
         m.exec(e.globalPos())
+
+    def set_login(self, on: bool) -> None:
+        try:
+            autostart.set_login(on)
+            self.stay = self.stay or on  # started at login: don't wander off when idle
+        except Exception as exc:  # never let a menu click crash the pet
+            print(f"leo: could not change start at login: {exc}", file=sys.stderr)
 
     def set_water(self, enabled: bool | None = None, minutes: int | None = None) -> None:
         cfg = config.load()
@@ -586,6 +599,8 @@ def run(first_event: dict | None = None, stay: bool = False) -> int:
         send({"cmd": "ping"}, timeout=0.3)
         if first_event:
             send(first_event)
+        if stay:
+            send({"cmd": "stay"})
         return 0
     except OSError:
         pass

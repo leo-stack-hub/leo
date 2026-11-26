@@ -49,6 +49,18 @@ py setup.py             # Windows
 ```
 
 Start a new Claude Code session and Leo appears. It quits ~15 minutes after the last session ends.
+
+**4. Optional: make Leo an app that opens at login.** Right-click Leo → **Start at login**, or:
+
+```sh
+~/.leo/venv/bin/python run_leo.py autostart on        # Windows: %USERPROFILE%\.leo\venv\Scripts\python.exe
+```
+
+This adds **Leo** to Applications (macOS, so Spotlight and Launchpad find it), the Start menu
+(Windows) or your app launcher (Linux), and opens him every time you log in, staying around
+between Claude Code sessions with your settings and water reminders. `autostart off` stops it;
+`app --remove` removes the app as well. Plugin updates don't break it: the launcher
+(`~/.leo/launch.py`) finds wherever Claude Code installed the current version.
 Try it without Claude: run the command that `setup.py` prints at the end (it ends in `run --stay`).
 
 ## Make your avatar
@@ -107,12 +119,12 @@ Sounds are the system's own (macOS `/System/Library/Sounds`, Windows `C:\Windows
 freedesktop theme via `canberra-gtk-play`). Right-click → Mute silences them.
 
 ## Right-click menu
-Character · Upload avatar · Avatar style · Body · Remove plain background · Remove uploaded avatar · Size · Mute sounds · Quit.
+Character · Upload avatar · Avatar style · Body · Remove plain background · Remove uploaded avatar · Hydration reminder · Size · Start at login · Mute sounds · Quit.
 Drag to move it; it remembers where you left it. Settings: `~/.leo/config.json`.
 
 ## Commands
 `run_leo.py run [--stay]` · `avatar IMAGE [--style S] [--remove-bg]` · `avatar --reset` · `character leo|boy|girl` ·
-`send STATE` (demo a state for 5 s) · `quit`
+`send STATE` (demo a state for 5 s) · `water on|off|--every N|--now` · `autostart on|off|status` · `app [--remove]` · `quit`
 
 ## How it works
 Claude Code runs `hooks/leo-hook` (a tiny `sh` script) on each event; it calls `leo/hook.py`
@@ -122,7 +134,7 @@ line over localhost TCP to the Qt window; the port and a secret token live in `~
 badges, `avatar.py` builds the avatar.
 
 ## Uninstall
-`/plugin uninstall leo@leo` and `/plugin marketplace remove leo`, quit Leo from its right-click menu, then delete the `~/.leo` folder and the downloaded `leo` folder.
+Run `run_leo.py app --remove` (removes the app and the login item), then `/plugin uninstall leo@leo` and `/plugin marketplace remove leo`, quit Leo from its right-click menu, then delete the `~/.leo` folder and the downloaded `leo` folder.
 
 ## Not included (yet)
 Click-to-focus terminal, wandering, Do Not Disturb, per-character sounds, a standalone app.

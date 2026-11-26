@@ -330,3 +330,73 @@ def test_lion_draws_every_state(state, detail):
     lion.draw_lion(p, state, detail, 0.41)
     p.end()
     assert any(img.pixelColor(x, y).alpha() for x in range(0, img.width(), 7) for y in range(0, img.height(), 7))
+
+
+# --- Leo as an app / start at login ----------------------------------------------------------
+
+
+@pytest.fixture
+def fake_home(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("APPDATA", str(tmp_path / "AppData" / "Roaming"))
+    return tmp_path
+
+
+def test_mac_app_and_login_item(fake_home, jhome):
+    import plistlib
+
+    from leo import autostart
+
+    login = autostart.set_login(True, "darwin", icons=False)
+    app = fake_home / "Applications" / "Leo.app"
+    exe = app / "Contents" / "MacOS" / "Leo"
+    assert exe.exists() and os.access(exe, os.X_OK) and "launch.py" in exe.read_text()
+    info = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
+    assert info["CFBundleExecutable"] == "Leo" and info["LSUIElement"] is True
+    agent = plistlib.loads(login.read_bytes())
+    assert agent["RunAtLoad"] is True and agent["ProgramArguments"] == [str(exe)]
+    assert autostart.enabled("darwin")
+    autostart.set_login(False, "darwin")
+    assert not autostart.enabled("darwin") and app.exists()  # app stays, login item gone
+    autostart.remove_all("darwin")
+    assert not app.exists() and not (jhome / "launch.py").exists()
+
+
+def test_linux_desktop_entries(fake_home, jhome):
+    from leo import autostart
+
+    autostart.set_login(True, "linux", icons=False)
+    for f in (fake_home / ".local/share/applications/leo.desktop",
+              fake_home / ".config/autostart/leo.desktop"):
+        text = f.read_text()
+        assert "Name=Leo" in text and str(jhome / "launch.py") in text
+
+
+def test_windows_shortcut_script_uses_pythonw():
+    from leo import autostart
+
+    ps = autostart.win_shortcut_script(Path("C:/Users/O'Neil/Start Menu/Leo.lnk"), None)
+    assert "pythonw.exe" in ps and "launch.py" in ps and "O''Neil" in ps and ps.endswith("$s.Save()")
+
+
+def test_launcher_finds_the_installed_plugin(fake_home, jhome):
+    from leo import autostart
+
+    code = autostart.write_launcher().read_text()
+    compile(code, "launch.py", "exec")
+    ns: dict = {}
+    exec(code.split("\nroot = plugin_root()")[0], ns)  # everything but the actual start
+    assert ns["plugin_root"]() == autostart.ROOT  # nothing installed: falls back to this copy
+    plugins = fake_home / ".claude" / "plugins"
+    plugins.mkdir(parents=True)
+    (plugins / "installed_plugins.json").write_text(json.dumps(
+        {"plugins": {"leo@leo": [{"installPath": str(ROOT)}]}}))
+    assert ns["plugin_root"]() == ROOT
+
+
+def test_mac_app_runs_python_natively():
+    from leo import autostart
+
+    assert "/usr/bin/arch -arm64 " in autostart.mac_exe_script("arm64")
+    assert "/usr/bin/arch -x86_64 " in autostart.mac_exe_script("x86_64")
+    assert "arch" not in autostart.mac_exe_script("ppc")

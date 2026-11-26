@@ -3,6 +3,8 @@
     run                  start the pet          avatar IMAGE   make an avatar from a picture
     send STATE           demo a state           character NAME leo | boy | girl
     water on|off|--every N   hydration reminder
+    autostart on|off     start Leo at login (also adds Leo to Applications / Start menu)
+    app [--remove]       add Leo to Applications / Start menu (or remove everything)
     quit                 stop the pet
 """
 
@@ -10,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 
 from . import __version__
@@ -48,6 +51,12 @@ def main(argv: list[str] | None = None) -> int:
     w.add_argument("--every", type=int, metavar="MINUTES", help="how often to remind (1-480; turns it on)")
     w.add_argument("--now", action="store_true", help="show the reminder now (preview)")
 
+    au = sub.add_parser("autostart", help="start Leo at login: on | off | status")
+    au.add_argument("mode", choices=["on", "off", "status"])
+
+    ap_ = sub.add_parser("app", help="add Leo to Applications / the Start menu")
+    ap_.add_argument("--remove", action="store_true", help="remove the app and the login item")
+
     s = sub.add_parser("send", help="show a state for 5 seconds")
     s.add_argument("state", choices=["idle", "greeting", "thinking", "working", "done",
                                      "waiting", "permission", "sleeping", "hydrate"])
@@ -79,6 +88,37 @@ def main(argv: list[str] | None = None) -> int:
             except OSError:
                 print("leo isn't running: start it first (run_leo.py run --stay)", file=sys.stderr)
                 return 1
+        return 0
+
+    if args.cmd == "autostart":
+        from . import autostart
+
+        if args.mode == "status":
+            print("start at login: " + ("on" if autostart.enabled() else "off"))
+            return 0
+        try:
+            path = autostart.set_login(args.mode == "on")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            print(f"leo: could not change start at login: {exc}", file=sys.stderr)
+            return 1
+        if args.mode == "on":
+            print(f"Leo will start at login ({path}).\nApp: {autostart.app_path()}")
+        else:
+            print("Leo won't start at login any more.")
+        return 0
+
+    if args.cmd == "app":
+        from . import autostart
+
+        try:
+            if args.remove:
+                autostart.remove_all()
+                print("Leo removed from your apps and from login.")
+            else:
+                print(f"Leo added: {autostart.install_app()}")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            print(f"leo: {exc}", file=sys.stderr)
+            return 1
         return 0
 
     if args.cmd == "desktop":
