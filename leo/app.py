@@ -1,4 +1,4 @@
-"""The Leo desktop pet: a small always-on-top window that animates the avatar."""
+"""The Leo desktop companion: a small always-on-top window that animates the avatar."""
 
 from __future__ import annotations
 
@@ -93,7 +93,7 @@ def star(cx: float, cy: float, r: float) -> QPolygonF:
     return QPolygonF(pts)
 
 
-class Pet(QWidget):
+class Companion(QWidget):
     def __init__(self, stay: bool = False) -> None:
         super().__init__()
         self.cfg = config.load()
@@ -177,7 +177,7 @@ class Pet(QWidget):
             arr = np.frombuffer(buf, np.uint8, img.height() * img.bytesPerLine())
             arr = arr.reshape(img.height(), img.bytesPerLine())[:, : img.width() * 4]
             self.animator = animate.Animator(arr.reshape(img.height(), img.width(), 4).copy())
-        except Exception as exc:  # never let animation break the pet
+        except Exception as exc:  # never let animation break the companion
             print(f"leo: animation off ({exc})", file=sys.stderr)
 
     def animated_pixmap(self, state: str, detail: str | None, t: float) -> QPixmap | None:
@@ -542,7 +542,7 @@ class Pet(QWidget):
         try:
             autostart.set_login(on)
             self.stay = self.stay or on  # started at login: don't wander off when idle
-        except Exception as exc:  # never let a menu click crash the pet
+        except Exception as exc:  # never let a menu click crash the companion
             print(f"leo: could not change start at login: {exc}", file=sys.stderr)
 
     def set_water(self, enabled: bool | None = None, minutes: int | None = None) -> None:
@@ -613,9 +613,9 @@ def run(first_event: dict | None = None, stay: bool = False) -> int:
             AppKit.NSApplication.sharedApplication().setActivationPolicy_(1)
         except Exception:
             pass
-    pet = Pet(stay=stay)
+    companion = Companion(stay=stay)
     if first_event:
-        pet.handle(first_event)
-    pet.show()
-    pet.raise_()
+        companion.handle(first_event)
+    companion.show()
+    companion.raise_()
     return app.exec()

@@ -2,7 +2,7 @@
 
 **Website:** https://leo-claude.vercel.app · **Code:** https://github.com/leo-stack-hub/leo
 
-A small desktop pet for Claude Code, on **macOS, Windows and Linux**. It floats on your screen
+A small desktop companion for Claude Code, on **macOS, Windows and Linux**. It floats on your screen
 and shows, live, what Claude is doing: thinking, reading, typing, running commands, waiting for
 you, asking permission, done. It plays a short system sound on the important moments and tells
 you how long a turn took.
@@ -114,7 +114,7 @@ in code, so it is simple and flat, not a 3D render. Right-click → Body switche
 
 (An uploaded avatar bobs, sways and shakes instead of walking, since it is a single picture.)
 
-With several sessions there is still one pet: it shows the most urgent state and counts sessions.
+With several sessions there is still one companion: it shows the most urgent state and counts sessions.
 Sounds are the system's own (macOS `/System/Library/Sounds`, Windows `C:\Windows\Media`, Linux
 freedesktop theme via `canberra-gtk-play`). Right-click → Mute silences them.
 
@@ -128,7 +128,7 @@ Drag to move it; it remembers where you left it. Settings: `~/.leo/config.json`.
 
 ## How it works
 Claude Code runs `hooks/leo-hook` (a tiny `sh` script) on each event; it calls `leo/hook.py`
-(stdlib only, silent, always exits 0, starts the pet on SessionStart). The hook sends one JSON
+(stdlib only, silent, always exits 0, starts the companion on SessionStart). The hook sends one JSON
 line over localhost TCP to the Qt window; the port and a secret token live in `~/.leo/leo.port`.
 `states.py` (pure Python) turns events into states, `app.py` animates the avatar and draws
 badges, `avatar.py` builds the avatar.

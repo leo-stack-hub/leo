@@ -1,7 +1,7 @@
-"""Claude Code hook: forward the event on stdin to the Leo pet.
+"""Claude Code hook: forward the event on stdin to the Leo companion.
 
 Golden rule: stdlib only, print nothing, always exit 0, be fast.
-Starts the pet on SessionStart if it isn't running (needs ~/.leo/venv from setup.py).
+Starts the companion on SessionStart if it isn't running (needs ~/.leo/venv from setup.py).
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ def build_message(payload: dict) -> dict:
     }
 
 
-def launch_pet(first_event: dict) -> None:
+def launch_companion(first_event: dict) -> None:
     py = venv_python(windowed=True)
     if not py.exists() or os.environ.get("LEO_NO_LAUNCH"):  # setup.py not run: stay silent
         return
@@ -63,7 +63,7 @@ def main() -> None:
             send(msg)
         except OSError:
             if msg["event"] == "SessionStart":
-                launch_pet(msg)
+                launch_companion(msg)
     except Exception:
         pass
 

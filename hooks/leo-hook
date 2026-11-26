@@ -1,5 +1,5 @@
 #!/bin/sh
-# Leo plugin hook: forwards a Claude Code event (JSON on stdin) to the Leo pet.
+# Leo plugin hook: forwards a Claude Code event (JSON on stdin) to the Leo companion.
 # POSIX sh: runs on macOS, Linux and Windows (Git Bash, which Claude Code uses on Windows).
 # Golden rule: print nothing, always exit 0.
 

@@ -1,8 +1,8 @@
 """Paths and the tiny wire protocol. Stdlib only (the hook imports this).
 
-The pet listens on 127.0.0.1 (random port) and writes the port plus a secret token to
+The companion listens on 127.0.0.1 (random port) and writes the port plus a secret token to
 ~/.leo/leo.port. TCP works the same on macOS, Linux and Windows; the token keeps other
-local programs from talking to the pet.
+local programs from talking to the companion.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ def launcher() -> Path:
 
 
 def send(msg: dict, timeout: float = 0.2) -> None:
-    """Send one JSON line to the running pet. Raises OSError if it isn't running."""
+    """Send one JSON line to the running companion. Raises OSError if it isn't running."""
     try:
         info = json.loads(port_file().read_text())
         port, token = int(info["port"]), str(info["token"])

@@ -110,7 +110,7 @@ class Watcher:
                     if now != self.replying:
                         self.replying = now
                         self._emit("UserPromptSubmit" if now else "Stop")
-            except Exception as exc:  # never let the watcher break the pet
+            except Exception as exc:  # never let the watcher break the companion
                 print(f"leo: desktop watcher: {exc}", file=sys.stderr)
             time.sleep(POLL)
 

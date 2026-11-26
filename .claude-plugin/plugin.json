@@ -1,6 +1,6 @@
 {
   "name": "leo",
   "version": "0.9.0",
-  "description": "Leo: a desktop pet that shows live what Claude Code is doing. Upload any picture and Leo turns it into its avatar.",
-  "keywords": ["desktop-pet", "notifications", "hooks", "avatar"]
+  "description": "Leo: a desktop companion that shows live what Claude Code is doing. Upload any picture and Leo turns it into its avatar.",
+  "keywords": ["desktop-companion", "notifications", "hooks", "avatar"]
 }

@@ -6,7 +6,7 @@
 
 Everything starts ~/.leo/launch.py, which finds the plugin wherever Claude Code installed
 it (the install folder has the version in its name, so it moves on every update) and runs
-the pet with --stay. Stdlib only, except the optional icon (Qt + Pillow from ~/.leo/venv).
+the companion with --stay. Stdlib only, except the optional icon (Qt + Pillow from ~/.leo/venv).
 """
 
 from __future__ import annotations
@@ -214,7 +214,7 @@ def _mac_login(plist: Path, app: Path) -> None:
 
 def _desktop_entry(icon: Path | None) -> str:
     return ("[Desktop Entry]\nType=Application\nName=Leo\n"
-            "Comment=A desktop pet that shows what Claude Code is doing\n"
+            "Comment=A desktop companion that shows what Claude Code is doing\n"
             f'Exec="{venv_python()}" "{launch_py()}"\n'
             + (f"Icon={icon}\n" if icon else "") + "Terminal=false\nCategories=Utility;\n"
             "X-GNOME-Autostart-enabled=true\n")
@@ -231,7 +231,7 @@ def win_shortcut_script(lnk: Path, icon: Path | None) -> str:
         f"$s.TargetPath = {_ps_quote(venv_python(windowed=True, platform='win32'))}",
         f"$s.Arguments = {_ps_quote(chr(34) + str(launch_py()) + chr(34))}",
         f"$s.WorkingDirectory = {_ps_quote(home())}",
-        "$s.Description = 'Leo: a desktop pet for Claude Code'",
+        "$s.Description = 'Leo: a desktop companion for Claude Code'",
     ]
     if icon:
         lines.append(f"$s.IconLocation = {_ps_quote(icon)}")

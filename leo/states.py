@@ -1,4 +1,4 @@
-"""Hook events -> what the pet shows. Pure Python (no Qt), so it is easy to test."""
+"""Hook events -> what the companion shows. Pure Python (no Qt), so it is easy to test."""
 
 from __future__ import annotations
 

@@ -1,11 +1,11 @@
 ---
 name: leo
-description: Set up and control the Leo desktop pet that shows what Claude Code is doing. Use when the user mentions Leo or "the pet", wants to upload or change the pet's avatar, restyle it (sticker, cartoon, pixel, toon full-body cartoon of their head), resize or mute it, or asks why it isn't reacting.
+description: Set up and control the Leo desktop companion that shows what Claude Code is doing. Use when the user mentions Leo or "the companion", wants to upload or change the companion's avatar, restyle it (sticker, cartoon, pixel, toon full-body cartoon of their head), resize or mute it, or asks why it isn't reacting.
 ---
 
-# Leo desktop pet (macOS, Linux, Windows)
+# Leo desktop companion (macOS, Linux, Windows)
 
-The plugin's hooks send every Claude Code event to a small pet window. The pet runs from a
+The plugin's hooks send every Claude Code event to a small companion window. The companion runs from a
 private Python environment at `~/.leo/venv`, created once by `${CLAUDE_PLUGIN_ROOT}/setup.py`.
 
 Define `LEO` as: `<venv python> ${CLAUDE_PLUGIN_ROOT}/run_leo.py`
@@ -15,7 +15,7 @@ Define `LEO` as: `<venv python> ${CLAUDE_PLUGIN_ROOT}/run_leo.py`
 ## Set up
 If `~/.leo/venv` does not exist, run `python3 ${CLAUDE_PLUGIN_ROOT}/setup.py` (Windows: `py`
 instead of `python3`; needs Python 3.10+). It downloads ~100 MB, so tell the user it takes a
-minute or two. Then `LEO run --stay` starts the pet now; otherwise it starts with the next
+minute or two. Then `LEO run --stay` starts the companion now; otherwise it starts with the next
 Claude Code session.
 
 ## Make an avatar from the user's picture
@@ -32,12 +32,12 @@ decide from the photo. It needs a front-facing portrait with the whole head in f
 wall or flat colour, skip it for busy backgrounds. Run again with another style to compare.
 `LEO character leo|boy|girl` picks a character (leo = the lion cub, the default) (or a pack folder name from ~/.leo/characters).
 
-`LEO water on|off`, `LEO water --every MINUTES` and `LEO water --now` control the hydration reminder (Leo drinks from a bottle and reminds the user to drink water; default off, every 45 minutes). `LEO avatar --reset` removes an uploaded picture and returns to the built-in character; who walks, sits, sleeps and jumps depending on state. A running pet reloads automatically.
-The pet's right-click menu has the same options (Upload avatar, Avatar style, Size, Mute).
+`LEO water on|off`, `LEO water --every MINUTES` and `LEO water --now` control the hydration reminder (Leo drinks from a bottle and reminds the user to drink water; default off, every 45 minutes). `LEO avatar --reset` removes an uploaded picture and returns to the built-in character; who walks, sits, sleeps and jumps depending on state. A running companion reloads automatically.
+The companion's right-click menu has the same options (Upload avatar, Avatar style, Size, Mute).
 
 ## Check or demo
 - `LEO send thinking` shows a state for 5 seconds (idle greeting thinking working done waiting permission sleeping)
-- `LEO quit` stops the pet
+- `LEO quit` stops the companion
 - Not reacting? Check `~/.leo/venv` exists, run `LEO run --stay`, then `LEO send done`.
 
 Settings: `~/.leo/config.json` (style, remove_bg, size, muted, x, y).

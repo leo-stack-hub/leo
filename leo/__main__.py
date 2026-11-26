@@ -1,11 +1,11 @@
 """leo command line:  python run_leo.py <command>
 
-    run                  start the pet          avatar IMAGE   make an avatar from a picture
+    run                  start the companion    avatar IMAGE   make an avatar from a picture
     send STATE           demo a state           character NAME leo | boy | girl
     water on|off|--every N   hydration reminder
     autostart on|off     start Leo at login (also adds Leo to Applications / Start menu)
     app [--remove]       add Leo to Applications / Start menu (or remove everything)
-    quit                 stop the pet
+    quit                 stop the companion
 """
 
 from __future__ import annotations
@@ -27,12 +27,12 @@ def notify_running() -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="leo", description="Leo: a desktop pet for Claude Code")
+    ap = argparse.ArgumentParser(prog="leo", description="Leo: a desktop companion for Claude Code")
     ap.add_argument("--version", action="version", version=__version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    r = sub.add_parser("run", help="start the pet")
-    r.add_argument("--first", help="(internal) hook event that launched the pet")
+    r = sub.add_parser("run", help="start the companion")
+    r.add_argument("--first", help="(internal) hook event that launched the companion")
     r.add_argument("--stay", action="store_true", help="don't quit when no session is open")
 
     a = sub.add_parser("avatar", help="create the avatar from a picture")
@@ -60,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("send", help="show a state for 5 seconds")
     s.add_argument("state", choices=["idle", "greeting", "thinking", "working", "done",
                                      "waiting", "permission", "sleeping", "hydrate"])
-    sub.add_parser("quit", help="stop the pet")
+    sub.add_parser("quit", help="stop the companion")
     sub.add_parser("desktop", help="macOS: allow Leo to follow chats in the Claude desktop app")
 
     args = ap.parse_args(argv)

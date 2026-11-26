@@ -151,7 +151,7 @@ def test_bad_image_keeps_old_avatar(tmp_path):
     assert avatar.avatar_path().read_bytes() == before
 
 
-def test_hook_is_silent_and_exits_zero_without_pet(jhome):
+def test_hook_is_silent_and_exits_zero_without_companion(jhome):
     env = dict(os.environ, LEO_HOME=str(jhome), LEO_NO_LAUNCH="1")
     for stdin in (json.dumps({"hook_event_name": "Stop"}), "garbage", ""):
         r = subprocess.run([sys.executable, str(ROOT / "leo/hook.py")], input=stdin.encode(),
@@ -173,7 +173,7 @@ def test_venv_python_paths_per_platform(jhome):
     assert common.venv_python(windowed=True, platform="win32").name == "pythonw.exe"
 
 
-def test_send_without_pet_raises_oserror():
+def test_send_without_companion_raises_oserror():
     from leo import common
 
     with pytest.raises(OSError):
